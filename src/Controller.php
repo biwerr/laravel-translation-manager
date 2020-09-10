@@ -200,4 +200,39 @@ class Controller extends BaseController
         }
         return redirect()->back();
     }
+
+    public function editTranslation($group, $name)
+    {
+        $parts = explode('|', $name);
+
+        if (count($parts) < 2) {
+            $key = $parts[0];
+            $locale = app()->getLocale();
+
+        } else {
+            $key = $parts[1];
+            $locale = $parts[0];
+        }
+
+        $attributes = [
+            'locale' => $locale,
+            'group'  => $group,
+            'key'    => $key,
+        ];
+
+        $translation = Translation::where($attributes)->first();
+
+        return \Response::json($translation == null ? new Translation($attributes) : $translation);
+    }
+
+
+    public function enableLiveEdit()
+    {
+        /** @var \Illuminate\Contracts\Session\Session $session */
+        $session = app()->get('session');
+        ! $session->get('translate.live',false) ?
+            $session->put('translate.live', true) : $session->put('translate.live',false);
+
+        return back();
+    }
 }
